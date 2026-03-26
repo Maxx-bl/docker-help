@@ -216,224 +216,6 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.78rem;
     color: var(--accent1);
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fiche Bilan — R4A08 Virtualisation</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0d0f14;
-    --surface: #13161e;
-    --border: #1e2330;
-    --accent1: #00e5ff;
-    --accent2: #7c3aed;
-    --accent3: #f59e0b;
-    --accent4: #10b981;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --code-bg: #0a0c10;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    min-height: 100vh;
-    padding: 2rem 1.5rem 4rem;
-    line-height: 1.6;
-  }
-
-  /* Noise texture overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    max-width: 960px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-  }
-
-  header {
-    margin-bottom: 3rem;
-    border-left: 3px solid var(--accent1);
-    padding-left: 1.5rem;
-  }
-
-  header .label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--accent1);
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-  }
-
-  header h1 {
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
-    font-weight: 800;
-    line-height: 1.1;
-    color: #fff;
-  }
-
-  header h1 span {
-    color: var(--accent1);
-  }
-
-  header p {
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    margin-top: 0.75rem;
-  }
-
-  .tp-grid {
-    display: grid;
-    gap: 2rem;
-  }
-
-  .tp-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-
-  .tp-card:hover {
-    border-color: var(--card-accent, var(--accent1));
-  }
-
-  .tp-card[data-tp="1"] { --card-accent: var(--accent1); }
-  .tp-card[data-tp="2"] { --card-accent: var(--accent2); }
-  .tp-card[data-tp="3"] { --card-accent: var(--accent3); }
-  .tp-card[data-tp="4"] { --card-accent: var(--accent4); }
-
-  .tp-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.25rem 1.5rem;
-    background: linear-gradient(90deg, color-mix(in srgb, var(--card-accent) 8%, transparent), transparent);
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .tp-badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 0.25rem 0.6rem;
-    border-radius: 4px;
-    background: color-mix(in srgb, var(--card-accent) 18%, transparent);
-    color: var(--card-accent);
-    border: 1px solid color-mix(in srgb, var(--card-accent) 30%, transparent);
-    white-space: nowrap;
-  }
-
-  .tp-title {
-    flex: 1;
-  }
-
-  .tp-title h2 {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #fff;
-  }
-
-  .tp-title p {
-    font-size: 0.78rem;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    margin-top: 0.15rem;
-  }
-
-  .toggle-icon {
-    color: var(--muted);
-    font-size: 1rem;
-    transition: transform 0.3s;
-    flex-shrink: 0;
-  }
-
-  .tp-card.open .toggle-icon {
-    transform: rotate(180deg);
-  }
-
-  .tp-body {
-    display: none;
-    padding: 1.5rem;
-  }
-
-  .tp-card.open .tp-body {
-    display: block;
-  }
-
-  .section {
-    margin-bottom: 1.75rem;
-  }
-
-  .section:last-child {
-    margin-bottom: 0;
-  }
-
-  .section-title {
-    font-size: 0.7rem;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--card-accent);
-    margin-bottom: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  .cmd-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
-  }
-
-  .cmd {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: start;
-    gap: 0.75rem;
-    background: var(--code-bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0.6rem 0.9rem;
-    transition: border-color 0.15s;
-  }
-
-  .cmd:hover {
-    border-color: color-mix(in srgb, var(--card-accent) 40%, transparent);
-  }
-
-  .cmd code {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.78rem;
-    color: var(--accent1);
     word-break: break-all;
     line-height: 1.5;
   }
@@ -568,4 +350,225 @@
           <div class="section-title">Dockerfile · Build</div>
           <div class="cmd-list">
             <div class="cmd">
+              <code>FROM nginx<br>WORKDIR /usr/share/nginx/html<br>RUN echo '&lt;body&gt;Hello&lt;/body&gt;' > hello.html<br>RUN ["chmod","444","hello.html"]<br>COPY . .<br>CMD ["/usr/games/hangman"]</code>
+              <span class="cmd-desc">Instructions clés</span>
+            </div>
+            <div class="cmd"><code>docker build -t nginx-hello .</code><span class="cmd-desc">Construire une image</span></div>
+            <div class="cmd"><code>docker run --rm -ti nginx-hello</code><span class="cmd-desc">Tester l'image construite</span></div>
+          </div>
+        </div>
 
+      </div>
+    </div>
+
+    <!-- TP 2 -->
+    <div class="tp-card open" data-tp="2">
+      <div class="tp-header" onclick="toggle(this)">
+        <div class="tp-badge">TP 02</div>
+        <div class="tp-title">
+          <h2>Asterisk (VoIP)</h2>
+          <p>SIP · Linphone · Dockerfile avancé</p>
+        </div>
+        <div class="toggle-icon">▼</div>
+      </div>
+      <div class="tp-body">
+
+        <div class="section">
+          <div class="section-title">Nettoyage initial</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="2"><code>docker rm --force $(docker ps -aq)</code><span class="cmd-desc">Supprimer tous les conteneurs</span></div>
+            <div class="cmd" data-tp="2"><code>docker pull debian</code><span class="cmd-desc">ou docker load -i debian.tar.gz</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Conteneur Asterisk</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="2"><code>docker run -ti --name asterisk-dev --network host debian</code><span class="cmd-desc">Réseau hôte obligatoire pour SIP</span></div>
+            <div class="cmd" data-tp="2"><code>apt update && apt install -y asterisk</code><span class="cmd-desc">Dans le conteneur</span></div>
+            <div class="cmd" data-tp="2"><code>docker cp asterisk-dev:/etc/asterisk/sip.conf ./</code><span class="cmd-desc">Récupérer le fichier de config</span></div>
+            <div class="cmd" data-tp="2"><code>docker cp asterisk-dev:/etc/asterisk/extensions.conf ./</code><span class="cmd-desc"></span></div>
+            <div class="cmd" data-tp="2"><code>docker cp sip.conf asterisk-dev:/etc/asterisk/sip.conf</code><span class="cmd-desc">Remettre le fichier modifié</span></div>
+            <div class="cmd" data-tp="2"><code>asterisk -vvvvvvc</code><span class="cmd-desc">Lancer Asterisk (dans le conteneur)</span></div>
+          </div>
+          <div class="note"><strong>sip.conf</strong> → ajouter [alice] et [bob] avec type=friend, secret, context=infoS4<br><strong>extensions.conf</strong> → [infoS4] exten => 100,1,Dial(SIP/alice) …</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Conteneur Linphone</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="2"><code>docker run -ti --name linphone-dev --network host --device /dev/snd debian</code><span class="cmd-desc">Accès carte son</span></div>
+            <div class="cmd" data-tp="2"><code>apt install -y linphone-cli</code><span class="cmd-desc">Dans le conteneur</span></div>
+            <div class="cmd" data-tp="2"><code>mkdir -p /root/.local/share/linphone</code><span class="cmd-desc"></span></div>
+          </div>
+          <div class="note">
+            <strong>Commandes Linphone (dans linphone-dev) :</strong><br>
+            linphonec → soundcard list → soundcard use 2<br>
+            register sip:alice@IP_serveur IP_serveur mdp-alice<br>
+            call 101 &nbsp;|&nbsp; answer &nbsp;|&nbsp; terminate
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Dockerfile Asterisk (volume)</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="2">
+              <code>FROM debian<br>RUN apt update && apt install -y asterisk<br>CMD ["asterisk", "-vvvvvvc"]</code>
+              <span class="cmd-desc">Dockerfile minimal</span>
+            </div>
+            <div class="cmd" data-tp="2"><code>docker build -t mon-asterisk .</code><span class="cmd-desc">Construire l'image</span></div>
+            <div class="cmd" data-tp="2"><code>docker run --network host -v ./conf:/etc/asterisk mon-asterisk</code><span class="cmd-desc">Monter les fichiers de config</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TP 3 -->
+    <div class="tp-card open" data-tp="3">
+      <div class="tp-header" onclick="toggle(this)">
+        <div class="tp-badge">TP 03</div>
+        <div class="tp-title">
+          <h2>Nagios (Monitoring)</h2>
+          <p>Apache · SNMP · Surveillance réseau</p>
+        </div>
+        <div class="toggle-icon">▼</div>
+      </div>
+      <div class="tp-body">
+
+        <div class="section">
+          <div class="section-title">Nettoyage + lancement</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="3"><code>docker swarm leave --force</code><span class="cmd-desc">Quitter le swarm précédent</span></div>
+            <div class="cmd" data-tp="3"><code>docker rm --force $(docker ps -aq)</code><span class="cmd-desc"></span></div>
+            <div class="cmd" data-tp="3"><code>docker run -ti --name nagios -p 8080:80 debian</code><span class="cmd-desc">Conteneur Nagios, port 80→8080</span></div>
+            <div class="cmd" data-tp="3"><code>apt update && apt install -y nagios4 iproute2 procps nano</code><span class="cmd-desc">Dans le conteneur</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Configuration Apache + Nagios</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="3"><code>a2enmod cgi rewrite</code><span class="cmd-desc">Activer modules Apache</span></div>
+            <div class="cmd" data-tp="3"><code>htdigest /etc/nagios4/htdigest.users "Nagios Access" nagiosadmin</code><span class="cmd-desc">Créer le compte admin</span></div>
+            <div class="cmd" data-tp="3"><code>apachectl start</code><span class="cmd-desc">Démarrer Apache</span></div>
+            <div class="cmd" data-tp="3"><code>nagios4 /etc/nagios4/nagios.cfg</code><span class="cmd-desc">Démarrer Nagios (noter le PID)</span></div>
+          </div>
+          <div class="note">
+            <strong>nagios4-cgi.conf</strong> : commenter Require ip, remplacer &lt;Files "cmd.cgi"&gt; par &lt;FilesMatch ""&gt;, activer Require valid-user<br>
+            <strong>cgi.cfg</strong> : use_authentication=1
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Recharger la configuration</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="3"><code>kill -HUP &lt;PID_nagios&gt;</code><span class="cmd-desc">Recharger sans redémarrer</span></div>
+            <div class="cmd" data-tp="3"><code>docker exec -ti nagios bash</code><span class="cmd-desc">Ouvrir un 2ème terminal dans le conteneur</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">SNMP — Surveillance imprimantes</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="3"><code>snmpwalk -v2c -c public IMPI118 -m ALL > oids_numeriques</code><span class="cmd-desc">Récupérer tous les OIDs</span></div>
+            <div class="cmd" data-tp="3"><code>apt install -y snmp-mibs-downloader && download-mibs</code><span class="cmd-desc">Installer les bases MIB</span></div>
+            <div class="cmd" data-tp="3"><code>snmpwalk -v2c -c public IMPI118 -m ALL > oids_symboliques</code><span class="cmd-desc">OIDs avec noms symboliques</span></div>
+            <div class="cmd" data-tp="3"><code>/usr/lib/nagios/plugins/check_snmp -H IMPI118 -C public -o OID_toner -l "Toner level" -u " sheets" -w 10000: -c 1000:</code><span class="cmd-desc">Tester le plugin SNMP</span></div>
+          </div>
+          <div class="note">
+            Fichier <strong>/etc/nagios4/objects/printer.cfg</strong> : définir hôtes IMPI118/IMPI120 + services PING + check_snmp<br>
+            check_command check_snmp!-C public -o OID_toner_courant -l "Toner level" -u " sheets" -w 10000: -c 1000:
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TP 4 -->
+    <div class="tp-card open" data-tp="4">
+      <div class="tp-header" onclick="toggle(this)">
+        <div class="tp-badge">TP 04</div>
+        <div class="tp-title">
+          <h2>Docker Swarm</h2>
+          <p>Cluster · Services · Répartition de charge · Config</p>
+        </div>
+        <div class="toggle-icon">▼</div>
+      </div>
+      <div class="tp-body">
+
+        <div class="section">
+          <div class="section-title">Initialisation du cluster</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="4"><code>docker swarm leave --force</code><span class="cmd-desc">Quitter l'ancien swarm</span></div>
+            <div class="cmd" data-tp="4"><code>docker rm --force $(docker ps -aq)</code><span class="cmd-desc">Nettoyer les conteneurs</span></div>
+            <div class="cmd" data-tp="4"><code>docker swarm init --advertise-addr IP_eno1_manager</code><span class="cmd-desc">Créer le swarm (sur le Manager)</span></div>
+            <div class="cmd" data-tp="4"><code>docker swarm join --token TOKEN IP_eno1_manager</code><span class="cmd-desc">Rejoindre le swarm (sur chaque Worker)</span></div>
+            <div class="cmd" data-tp="4"><code>docker node ls</code><span class="cmd-desc">Vérifier les nœuds du cluster</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Gestion des services</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="4"><code>docker service create --name web --replicas N nginx</code><span class="cmd-desc">Créer un service répliqué</span></div>
+            <div class="cmd" data-tp="4"><code>docker service ls</code><span class="cmd-desc">Lister les services</span></div>
+            <div class="cmd" data-tp="4"><code>docker service ps web</code><span class="cmd-desc">Voir les instances du service</span></div>
+            <div class="cmd" data-tp="4"><code>docker ps</code><span class="cmd-desc">Instances locales (sur chaque nœud)</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Tolérance aux pannes</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="4"><code>docker swarm leave</code><span class="cmd-desc">Worker quitte le swarm</span></div>
+            <div class="cmd" data-tp="4"><code>docker node ls</code><span class="cmd-desc">Surveiller l'état des nœuds</span></div>
+            <div class="cmd" data-tp="4"><code>docker rm --force &lt;ID_conteneur&gt;</code><span class="cmd-desc">Supprimer une instance (Docker en recrée une)</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Mise à jour du service (publication port · montage)</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="4"><code>docker service update --publish-add 8080:80 web</code><span class="cmd-desc">Publier port 80 → 8080 sur tous les nœuds</span></div>
+            <div class="cmd" data-tp="4"><code>docker service update --mount-add type=bind,src=/media/tp/S4/Virtualisation/TP3,dst=/usr/share/nginx/html web</code><span class="cmd-desc">Monter un répertoire NFS partagé</span></div>
+            <div class="cmd" data-tp="4"><code>docker service update --mount-rm /usr/share/nginx/html web</code><span class="cmd-desc">Démonter un volume</span></div>
+          </div>
+          <div class="note">
+            Test de répartition de charge : <strong>wget --no-proxy -nv -O- http://IP_instance/me.html</strong><br>
+            Recharger plusieurs fois → les requêtes sont distribuées entre les nœuds.
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Docker Config (partage de fichiers &lt; 500 ko)</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="4"><code>docker config create life /media/tp/S4/Virtualisation/files/game_of_life.html</code><span class="cmd-desc">Créer un config</span></div>
+            <div class="cmd" data-tp="4"><code>docker service update --config-add source=life,target=/usr/share/nginx/html/vie.html web</code><span class="cmd-desc">Ajouter le config au service</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Inspecter · Copier (sur les instances)</div>
+          <div class="cmd-list">
+            <div class="cmd" data-tp="4"><code>docker inspect &lt;ID_conteneur&gt;</code><span class="cmd-desc">Adresse IP d'une instance</span></div>
+            <div class="cmd" data-tp="4"><code>docker cp me.html &lt;ID_conteneur&gt;:/usr/share/nginx/html/me.html</code><span class="cmd-desc">Copier fichier dans une instance</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /.tp-grid -->
+
+  <footer>R4A08 Virtualisation · IUT d'Orsay BUT Informatique</footer>
+
+</div>
+
+<script>
+  function toggle(header) {
+    header.parentElement.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
