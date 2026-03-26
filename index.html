@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiche Bilan — R4A08 Virtualisation</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --border: #1e2330;
+    --accent1: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --accent4: #10b981;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --code-bg: #0a0c10;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1.5rem 4rem;
+    line-height: 1.6;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    margin-bottom: 3rem;
+    border-left: 3px solid var(--accent1);
+    padding-left: 1.5rem;
+  }
+
+  header .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent1);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  header h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: #fff;
+  }
+
+  header h1 span {
+    color: var(--accent1);
+  }
+
+  header p {
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-top: 0.75rem;
+  }
+
+  .tp-grid {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .tp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .tp-card:hover {
+    border-color: var(--card-accent, var(--accent1));
+  }
+
+  .tp-card[data-tp="1"] { --card-accent: var(--accent1); }
+  .tp-card[data-tp="2"] { --card-accent: var(--accent2); }
+  .tp-card[data-tp="3"] { --card-accent: var(--accent3); }
+  .tp-card[data-tp="4"] { --card-accent: var(--accent4); }
+
+  .tp-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--card-accent) 8%, transparent), transparent);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .tp-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--card-accent) 18%, transparent);
+    color: var(--card-accent);
+    border: 1px solid color-mix(in srgb, var(--card-accent) 30%, transparent);
+    white-space: nowrap;
+  }
+
+  .tp-title {
+    flex: 1;
+  }
+
+  .tp-title h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .tp-title p {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 0.15rem;
+  }
+
+  .toggle-icon {
+    color: var(--muted);
+    font-size: 1rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+
+  .tp-card.open .toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  .tp-body {
+    display: none;
+    padding: 1.5rem;
+  }
+
+  .tp-card.open .tp-body {
+    display: block;
+  }
+
+  .section {
+    margin-bottom: 1.75rem;
+  }
+
+  .section:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-title {
+    font-size: 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--card-accent);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .cmd-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .cmd {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: 0.75rem;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 0.9rem;
+    transition: border-color 0.15s;
+  }
+
+  .cmd:hover {
+    border-color: color-mix(in srgb, var(--card-accent) 40%, transparent);
+  }
+
+  .cmd code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent1);
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiche Bilan — R4A08 Virtualisation</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --border: #1e2330;
+    --accent1: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --accent4: #10b981;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --code-bg: #0a0c10;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1.5rem 4rem;
+    line-height: 1.6;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    margin-bottom: 3rem;
+    border-left: 3px solid var(--accent1);
+    padding-left: 1.5rem;
+  }
+
+  header .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent1);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  header h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: #fff;
+  }
+
+  header h1 span {
+    color: var(--accent1);
+  }
+
+  header p {
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-top: 0.75rem;
+  }
+
+  .tp-grid {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .tp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .tp-card:hover {
+    border-color: var(--card-accent, var(--accent1));
+  }
+
+  .tp-card[data-tp="1"] { --card-accent: var(--accent1); }
+  .tp-card[data-tp="2"] { --card-accent: var(--accent2); }
+  .tp-card[data-tp="3"] { --card-accent: var(--accent3); }
+  .tp-card[data-tp="4"] { --card-accent: var(--accent4); }
+
+  .tp-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--card-accent) 8%, transparent), transparent);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .tp-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--card-accent) 18%, transparent);
+    color: var(--card-accent);
+    border: 1px solid color-mix(in srgb, var(--card-accent) 30%, transparent);
+    white-space: nowrap;
+  }
+
+  .tp-title {
+    flex: 1;
+  }
+
+  .tp-title h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .tp-title p {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 0.15rem;
+  }
+
+  .toggle-icon {
+    color: var(--muted);
+    font-size: 1rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+
+  .tp-card.open .toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  .tp-body {
+    display: none;
+    padding: 1.5rem;
+  }
+
+  .tp-card.open .tp-body {
+    display: block;
+  }
+
+  .section {
+    margin-bottom: 1.75rem;
+  }
+
+  .section:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-title {
+    font-size: 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--card-accent);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .cmd-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .cmd {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: 0.75rem;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 0.9rem;
+    transition: border-color 0.15s;
+  }
+
+  .cmd:hover {
+    border-color: color-mix(in srgb, var(--card-accent) 40%, transparent);
+  }
+
+  .cmd code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent1);
+    word-break: break-all;
+    line-height: 1.5;
+  }
+
+  .cmd[data-tp="2"] code { color: #c084fc; }
+  .cmd[data-tp="3"] code { color: #fbbf24; }
+  .cmd[data-tp="4"] code { color: #34d399; }
+
+  .cmd-desc {
+    font-size: 0.73rem;
+    color: var(--muted);
+    text-align: right;
+    white-space: nowrap;
+    padding-top: 0.1rem;
+  }
+
+  .cmd-desc-full {
+    font-size: 0.73rem;
+    color: var(--muted);
+    grid-column: 1 / -1;
+    margin-top: -0.2rem;
+  }
+
+  .note {
+    background: color-mix(in srgb, var(--card-accent) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--card-accent) 20%, transparent);
+    border-left: 3px solid var(--card-accent);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-size: 0.78rem;
+    color: var(--text);
+    margin-top: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .note strong {
+    color: var(--card-accent);
+  }
+
+  /* Open all by default on desktop */
+  @media (min-width: 700px) {
+    .tp-card { animation: fadeUp 0.4s ease both; }
+    .tp-card:nth-child(1) { animation-delay: 0.05s; }
+    .tp-card:nth-child(2) { animation-delay: 0.1s; }
+    .tp-card:nth-child(3) { animation-delay: 0.15s; }
+    .tp-card:nth-child(4) { animation-delay: 0.2s; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  footer {
+    margin-top: 3rem;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="label">IUT d'Orsay · BUT Informatique</div>
+    <h1>Fiche Bilan<br><span>R4A08 Virtualisation</span></h1>
+    <p>// Commandes essentielles — TP 1 → TP 4</p>
+  </header>
+
+  <div class="tp-grid">
+
+    <!-- TP 1 -->
+    <div class="tp-card open" data-tp="1">
+      <div class="tp-header" onclick="toggle(this)">
+        <div class="tp-badge">TP 01</div>
+        <div class="tp-title">
+          <h2>Introduction à Docker</h2>
+          <p>Images · Conteneurs · Réseau · Dockerfile</p>
+        </div>
+        <div class="toggle-icon">▼</div>
+      </div>
+      <div class="tp-body">
+
+        <div class="section">
+          <div class="section-title">Nettoyage initial</div>
+          <div class="cmd-list">
+            <div class="cmd"><code>docker ps -a</code><span class="cmd-desc">Lister tous les conteneurs</span></div>
+            <div class="cmd"><code>docker rm --force $(docker ps -aq)</code><span class="cmd-desc">Supprimer tous les conteneurs</span></div>
+            <div class="cmd"><code>docker images -a</code><span class="cmd-desc">Lister toutes les images</span></div>
+            <div class="cmd"><code>docker rmi --force $(docker images -aq)</code><span class="cmd-desc">Supprimer toutes les images</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Images</div>
+          <div class="cmd-list">
+            <div class="cmd"><code>docker pull alpine</code><span class="cmd-desc">Télécharger une image</span></div>
+            <div class="cmd"><code>docker pull debian</code><span class="cmd-desc"></span></div>
+            <div class="cmd"><code>docker pull nginx</code><span class="cmd-desc"></span></div>
+            <div class="cmd"><code>docker load -i /chemin/image.tar.gz</code><span class="cmd-desc">Charger depuis un fichier local</span></div>
+            <div class="cmd"><code>docker rmi nginx-hello</code><span class="cmd-desc">Supprimer une image</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Conteneurs — cycle de vie</div>
+          <div class="cmd-list">
+            <div class="cmd"><code>docker run -ti --name alp1 alpine</code><span class="cmd-desc">Créer + lancer (interactif)</span></div>
+            <div class="cmd"><code>docker run --name ng1 nginx</code><span class="cmd-desc">Créer + lancer (détaché)</span></div>
+            <div class="cmd"><code>docker run --rm -ti alpine</code><span class="cmd-desc">Auto-supprimé à l'arrêt</span></div>
+            <div class="cmd"><code>docker kill alp1</code><span class="cmd-desc">Arrêter brutalement</span></div>
+            <div class="cmd"><code>docker stop alp1</code><span class="cmd-desc">Arrêt propre</span></div>
+            <div class="cmd"><code>docker rm alp1</code><span class="cmd-desc">Supprimer un conteneur</span></div>
+            <div class="cmd"><code>docker exec alp1 wc -l /usr/share/dict/french</code><span class="cmd-desc">Lancer une cmd dans un conteneur</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Réseau · Partage de fichiers</div>
+          <div class="cmd-list">
+            <div class="cmd"><code>docker inspect ng1</code><span class="cmd-desc">Infos détaillées (IP, montages…)</span></div>
+            <div class="cmd"><code>docker run -p 8080:80 nginx</code><span class="cmd-desc">Publier le port 80 → 8080</span></div>
+            <div class="cmd"><code>docker run -v ~/docker-share:/mnt alpine</code><span class="cmd-desc">Monter un répertoire hôte</span></div>
+            <div class="cmd"><code>docker cp alp1:/anything ./anything</code><span class="cmd-desc">Copier fichier conteneur → hôte</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Dockerfile · Build</div>
+          <div class="cmd-list">
+            <div class="cmd">
+
